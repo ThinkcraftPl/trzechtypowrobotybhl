@@ -41,7 +41,7 @@ void pulseLoop() {
   pulseLongAvrg/=PULSE_LONG_LEN;
   pulseLast1000[0]=pulseSignalAvrg;
   int pulseExists = 0;
-  if(pulseSignalAvrg > pulseMaxLastLong-5)
+  if(pulseSignalAvrg > pulseMaxLastLong-8)
   {
     pulseExists=1;
   }

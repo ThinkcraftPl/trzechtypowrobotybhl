@@ -6,10 +6,11 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
 
-#define BUTTON_1 3
-#define BUZZER 2
+#define BUTTON_1 2
+#define BUZZER 3
 #define LASER 1
 #define PHOTORESISTOR 0
+#define LED 5
 struct DataFromPip {
   float temp;
   float body_temp;
@@ -168,6 +169,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
   pinMode(LASER, OUTPUT);
   pinMode(PHOTORESISTOR, INPUT);
+  pinMode(LED, OUTPUT);
 }
 bool button_falling = false;
 bool laser = false;
@@ -187,6 +189,15 @@ void loop() {
   }
   digitalWrite(LASER, laser);
   resistor = analogRead(PHOTORESISTOR);
+  Serial.println(resistor);
+  if(resistor < 2048)
+  {
+    digitalWrite(LED, HIGH);
+  }
+  else
+  {
+    digitalWrite(LED, LOW);
+  }
   if(lastData.SOS)
   {
     tone(BUZZER, 1000);
