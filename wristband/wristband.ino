@@ -1,35 +1,39 @@
-#define PULSE_PIN 0
+#define PULSE_PIN 2
 
 void setup() {
   pinMode(PULSE_PIN, INPUT);
   Serial.begin(115200);
 }
 
-#define PULSE_AVRG_LEN 5
+#define PULSE_AVRG_LEN 3
 #define PULSE_LONG_LEN 200
-//#define PULSE_DEBUG
+#define PULSE_DEBUG
 int pulseSignalAvrg=0;
 int pulseLongAvrg=0;
 int pulseLast1000[1000];
 int pulse;
 bool pulseRaisedEdge = false;
-int pulseLastRaisedMillis[5];
+int pulseLastRaisedMillis[15];
 void pulseLoop() {
   int read = analogRead(PULSE_PIN);
   pulseSignalAvrg = ((PULSE_AVRG_LEN-1)*pulseSignalAvrg+read)/PULSE_AVRG_LEN;
   int pulseMaxLast1000 = read;
+  int pulseMaxLastLong = read;
   pulseLongAvrg=read;
   for(int i = 998; i>=0; i--)
   {
     pulseLast1000[i+1]=pulseLast1000[i];
     pulseMaxLast1000=max(pulseMaxLast1000, pulseLast1000[i]);
     if(i<PULSE_LONG_LEN-1)
+    {
       pulseLongAvrg+=pulseLast1000[i];
+      pulseMaxLastLong=max(pulseMaxLastLong,pulseLast1000[i]);
+    }
   }
   pulseLongAvrg/=PULSE_LONG_LEN;
-  pulseLast1000[0]=read;
+  pulseLast1000[0]=pulseSignalAvrg;
   int pulseExists = 0;
-  if(pulseSignalAvrg > pulseLongAvrg+20)
+  if(pulseSignalAvrg > pulseMaxLastLong-2)
   {
     pulseExists=1;
   }
@@ -37,17 +41,17 @@ void pulseLoop() {
   {
     pulseRaisedEdge=true;
     int avrgmillis = 0;
-    for(int i = 3; i>=0; i--)
+    for(int i = 13; i>=0; i--)
     {
       pulseLastRaisedMillis[i+1]=pulseLastRaisedMillis[i];
     }
     pulseLastRaisedMillis[0]=millis();
-    for(int i = 0; i<4; i++)
+    for(int i = 0; i<14; i++)
     {
       avrgmillis+=pulseLastRaisedMillis[i]-pulseLastRaisedMillis[i+1];
 
     }
-    avrgmillis/=5;
+    avrgmillis/=14;
     pulse = (60*1000)/avrgmillis;
   }
   else if(pulseExists==0)
@@ -65,6 +69,8 @@ void pulseLoop() {
   Serial.print(pulseMaxLast1000);
   Serial.print("; pulse:");
   Serial.print(pulse);
+  Serial.print("; lastLong:");
+  Serial.print(pulseMaxLastLong);
   Serial.println(";");
 #endif
 }

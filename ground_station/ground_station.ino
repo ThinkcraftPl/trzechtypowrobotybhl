@@ -5,17 +5,22 @@ void setup() {
   Serial.begin(9600);
 }
 int avrg = 0;
+int max_read = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   int read = analogRead(A1);
+  max_read = max(max_read, read);
   if(read>500)
   {
-  Serial.println(read);
     tone(9, 1000);
   }
   else
   {
     noTone(9);
   }
+  Serial.print("z:0; r:");
+  Serial.print(read);
+  Serial.print("; mr:");
+  Serial.println(max_read);
   delay(10);
 }
